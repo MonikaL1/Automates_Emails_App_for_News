@@ -1,36 +1,45 @@
-import requests as requests
-from pprint import pprint
+import datetime
 
-class NewsFeed:
-    """Representing multiple news titles adn link as a single string"""
-    base_url = "https://newsapi.org/v2/everything?"
-    api_key = "a8715c41714640fda4107c82e621bba4"
+import yagmail
+import pandas
+from news import NewsFeed
 
-    def __init__(self, interest, from_date, to_date, language):
-        self.interest = interest
-        self.from_date = from_date
-        self.to_date = to_date
-        self.language = language
+# Read the Excel file
+try:
+    df = pandas.read_excel('people.xlsx')
+except Exception as e:
+    print(f"Failed to read Excel file: {e}")
+    exit()
 
-    def get(self):
-
-        url = f"{self.base_url}" \
-              f"q={self.interest}&" \
-              f"from={self.from_date}&" \
-              f"to={self.to_date}&" \
-              f"language={self.language}&" \
-              f"apiKey={self.api_key}"
-
-        response = requests.get(url)
-        content = response.json()
-        articles = content['articles']
-
-        email_body = ''
-        for article in articles:
-            email_body = email_body + article['title'] + "\n" + article['url'] + "\n\n"
-
-        return email_body
+for index, row in df.iterrows():
+    today = datetime.datetime.now().strftime('%y-%m-%d')
+    yesterday = (datetime.datetime.now() - datetime.timedelta(days=1)).strftime('%y-%m-%d')
+    news_feed = NewsFeed(interest=row['interest'],
+                         from_date=yesterday,
+                         to_date=today)
 
 
-news_feed = NewsFeed(interest='bitcoin', from_date='2024-04-20', to_date='2024-05-20', language='en')
-print(news_feed.get())
+
+    # Set up the SMTP client
+    try:
+        email = yagmail.SMTP(user="mpython1112@gmail.com", password="kbqgxmwjhfdjchbf")
+    except Exception as e:
+        print(f"Failed to set up SMTP client: {e}")
+        continue  # Skip to the next iteration if SMTP setup fails
+
+    # Send the email
+    try:
+        email.send(
+            to=row['email'],
+            subject=f"Your {row['interest']} news for today",
+            contents=f"Hi {row['name']},\n\nSee what's on about {row['interest']} today:\n\n{news_feed.get()}"
+        )
+        print("Email sent successfully.")
+    except Exception as e:
+        print(f"Failed to send email: {e}")
+
+    # Close the SMTP connection
+    try:
+        email.close()
+    except Exception as e:
+        print(f"Failed to close SMTP connection: {e}")
