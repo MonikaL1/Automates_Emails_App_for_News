@@ -4,7 +4,7 @@ from pprint import pprint
 class NewsFeed:
     """Representing multiple news titles and links as a single string"""
     base_url = "https://newsapi.org/v2/everything?"
-    api_key = "a8715c41714640fda4107c82e621bba4"
+    api_key = ""
 
     def __init__(self, interest, from_date, to_date, language='en'):
         self.interest = interest

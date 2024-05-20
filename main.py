@@ -24,7 +24,7 @@ while True:
 
             # Set up the SMTP client
             try:
-                email = yagmail.SMTP(user="mpython1112@gmail.com", password="kbqgxmwjhfdjchbf")
+                email = yagmail.SMTP(user="", password="k")
             except Exception as e:
                 print(f"Failed to set up SMTP client: {e}")
                 continue  # Skip to the next iteration if SMTP setup fails
